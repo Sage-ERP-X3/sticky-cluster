@@ -55,7 +55,7 @@ function startFn (callback) {
   );
 }
 
-sticky(startFn, {
+sticky.start(startFn, {
   concurrency: parseInt(process.env.WEB_CONCURRENCY, 10),
   port: parseInt(process.env.PORT, 10),
   debug: (process.env.NODE_ENV === 'development')

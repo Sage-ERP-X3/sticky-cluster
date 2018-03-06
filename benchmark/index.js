@@ -1,9 +1,34 @@
 'use strict';
 
+var uuid = require('../lib/helpers').uuid;
+
 // inputs
   
-  var CONCURRENCY = parseInt(process.argv[2], 10) || 10;
-  var ITERATIONS = parseInt(process.argv[3], 10) || 100000;
+var CONCURRENCY = parseInt(process.argv[2], 10) || 10;
+var ITERATIONS = parseInt(process.argv[3], 10) || 100000;
+
+function benchmark (ips, hash, concurrency, iterations) {
+
+  var scatter = [];
+  var i = concurrency;
+  while (--i >= 0) scatter.push(0);
+
+  var index;
+  var timeStart;
+  var timeFinish;
+  i = iterations;
+
+  timeStart = Date.now();
+  while (--i >= 0) {
+    index = hash(ips[i]);
+    scatter[index]++;
+  }
+  timeFinish = Date.now();
+
+  console.log('  time (ms): ', timeFinish - timeStart);
+  console.log('  scatter: ', scatter);
+}
+
 
 // hashes
 
@@ -37,42 +62,55 @@
 
 // get random ips
 
-  console.log('generating random ips...');
-
-  var Chance = require('chance');
-  var chance = new Chance();
   var ips = [];
   var i = ITERATIONS;
 
+  try {
+    var Chance = require('chance');
+    var chance = new Chance();
+    console.log('generating random ips...');
+
+    while (--i >= 0) {
+      ips.push((i % 2) ? chance.ip() : chance.ipv6());
+    }
+    // benchmarking
+
+    console.log('benchmarking...');
+
+    console.log('int31');
+    benchmark(ips, int31, CONCURRENCY, ITERATIONS);
+
+    console.log('djb2');
+    benchmark(ips, djb2, CONCURRENCY, ITERATIONS);
+  } catch(e) {}
+
+  ips = [];
+  i = ITERATIONS;
+
+  console.log('generating local ips...');
   while (--i >= 0) {
-    ips.push((i % 2) ? chance.ip() : chance.ipv6());
+    ips.push('::ffff:127.0.0.1:' + (58000 + Math.floor(Math.random() * 1000)));
   }
 
-// benchmarking
-
+  // benchmarking
   console.log('benchmarking...');
 
-  function benchmark (ips, hash, concurrency, iterations) {
+  console.log('int31');
+  benchmark(ips, int31, CONCURRENCY, ITERATIONS);
 
-    var scatter = [];
-    var i = concurrency;
-    while (--i >= 0) scatter.push(0);
+  console.log('djb2');
+  benchmark(ips, djb2, CONCURRENCY, ITERATIONS);
 
-    var index;
-    var timeStart;
-    var timeFinish;
-    i = iterations;
+  ips = [];
+  i = ITERATIONS;
 
-    timeStart = Date.now();
-    while (--i >= 0) {
-      index = hash(ips[i]);
-      scatter[index]++;
-    }
-    timeFinish = Date.now();
-
-    console.log('  time (ms): ', timeFinish - timeStart);
-    console.log('  scatter: ', scatter);
+  console.log('generating local ips joined with uuid...');
+  while (--i >= 0) {
+    ips.push(uuid('::ffff:127.0.0.1:' + (58000 + Math.floor(Math.random() * 1000))));
   }
+
+  // benchmarking
+  console.log('benchmarking...');
 
   console.log('int31');
   benchmark(ips, int31, CONCURRENCY, ITERATIONS);
