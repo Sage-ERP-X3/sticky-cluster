@@ -1,0 +1,9 @@
+{
+  "name": "sticky-cluster-example",
+  "scripts": {
+    "start": "export NODE_ENV=development; node index.js"
+  },
+  "dependencies": {
+    "http-proxy": "^1.16.2"
+  }
+}

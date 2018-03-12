@@ -1,0 +1,19 @@
+#!/bin/sh
+
+ossl='/c/OpenSSL-Win64/openssl'
+# Create the CA Key and Certificate for signing Client Certs
+echo "=== Generate CA key"
+# $ossl genrsa -des3 -out ca2.key 4096
+echo "=== Generate CA certificate"
+# $ossl req -new -x509 -days 1825 -key ca.key -out ca.crt
+$ossl req -new -x509 -days 365 -key ca2.key -out ca2.crt -subj "/C=FR/ST=Gironde/L=Bordeaux/O=SAGE/CN=po035290"
+
+# Create the Server Key, CSR, and Certificate
+echo "=== Generate server key"
+# $ossl genrsa -des3 -out server2.key 1024
+echo "=== Generate server CSR"
+$ossl req -new -key server2.key -out server2.csr
+
+# We're self signing our own server cert here.  This is a no-no in production.
+echo "=== Generate server certificate"
+$ossl x509 -req -days 1825 -in server2.csr -CA ca2.crt -CAkey ca2.key -set_serial 01 -out server2.crt

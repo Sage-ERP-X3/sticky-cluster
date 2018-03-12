@@ -1,5 +1,5 @@
 'use strict';
-var sticky = require('../lib');
+var sticky = require('../../lib');
 
 function startFn (callback) {
   var async = require('async');
